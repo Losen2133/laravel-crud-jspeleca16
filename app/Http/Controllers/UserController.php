@@ -19,10 +19,12 @@ class UserController extends Controller
         ]);
 
         if(Auth::attempt(["email"=> $request->email,"password"=> $request->password])) {
-            return redirect()->route("products.index");
+            return redirect()->route("products.index")->withSuccess("Welcome back, " . Auth::user()->email);
         }
 
-        return redirect()->back();
+        return redirect()->back()->withErrors([
+            "email"=> "Invalid email or password."
+        ])->withInput();
     }
 
     public function register() {
@@ -32,8 +34,15 @@ class UserController extends Controller
     public function store(Request $request) {
         $request->validate([
             "email"=> "required|email",
-            "password"=> "required"
+            "password"=> "required",
+            "v-password"=> "required|confirmed:password"
         ]);
+        if(User::where("email", $request->email)->exists()) {
+            return redirect()->back()->withErrors([
+                "email"=> "Email already exists. Please login or use a different email."
+            ])->onlyInput();
+        }
+
 
         $user = new User();
 
@@ -41,10 +50,13 @@ class UserController extends Controller
         $user->password = bcrypt($request->password);
         $user->save();
 
-        return redirect()->route("login");
+        return redirect()->route("login")->withSuccess("User registered successfully. Please login.");
     }
 
-    public function logout() {
-
+    public function logout(Request $request) {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route("login")->withSuccess("You have been logged out successfully.");
     }
 }

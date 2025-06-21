@@ -11,7 +11,17 @@
 </head>
 <body>
     <div class="container">
-        <h3 class="mt-3">Simple Laravel 11 CRUD Application Tutorial</h3>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h3 class="mb-0">Simple Laravel 11 CRUD Application Tutorial</h3>
+            @auth
+            <form action="{{ route('users.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger">Logout</button>
+            </form>
+            @endauth
+        </div>
+
+        
 
         @yield('content')
 
